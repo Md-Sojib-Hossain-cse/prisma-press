@@ -12,6 +12,10 @@ const loginUserFromDB = async (payload : TLoginUser) => {
         }
     })
 
+    if(user.activeStatus === "BLOCKED"){
+        throw new Error("Your account is blocked , please contact to support.")
+    }
+
     const isPasswordMatched = await bcrypt.compare(payload.password , user.password);
 
     if(!isPasswordMatched){

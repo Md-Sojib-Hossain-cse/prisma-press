@@ -24,5 +24,4 @@ app.use("/api/user" , userRoutes)
 
 app.use("/api/auth" , authRoutes)
 
-
 export default app;

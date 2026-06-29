@@ -3,8 +3,6 @@ import httpStatus from "http-status"
 import { userService } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import config from "../../config";
-import { jwtUtils } from "../../utils/jwt";
 
 
 const registerUser = catchAsync( async(req : Request , res : Response , next : NextFunction) => {
@@ -23,15 +21,8 @@ const registerUser = catchAsync( async(req : Request , res : Response , next : N
 
 
 const getMyProfile = catchAsync( async(req : Request , res : Response , next : NextFunction) =>{
-    const {accessToken} = req.cookies;
 
-    const verifyToken = jwtUtils.verifyToken(accessToken , config.jwt_access_secret)
-
-    if(typeof verifyToken === "string"){
-        throw new Error(verifyToken)
-    }
-
-    const result = await userService.getMyProfileFromDB(verifyToken.id)
+    const result = await userService.getMyProfileFromDB(req.user?.id as string)
     
     sendResponse(res , {
         success : true,
@@ -41,7 +32,25 @@ const getMyProfile = catchAsync( async(req : Request , res : Response , next : N
     })
 }) 
 
+
+const updateProfile = catchAsync(async(req : Request , res : Response , next : NextFunction) => {
+
+    const userId = req.user?.id;
+
+    const payload = req.body;
+
+    const result = await userService.updateProfileOnDB(userId as string , payload)
+
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "User updated successfully",
+        data : result
+    })
+})
+
 export const userController = {
     registerUser,
-    getMyProfile
+    getMyProfile,
+    updateProfile
 }

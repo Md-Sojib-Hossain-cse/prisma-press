@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma"
-import { TCreatePostPayload } from "./post.interface"
+import { IUpdatePostPayload, TCreatePostPayload } from "./post.interface"
 
 const getAllPostsFromDB = async() => {
     const result = await prisma.post.findMany({
@@ -81,9 +81,54 @@ const createPostOnDB = async(userId : string ,payload : TCreatePostPayload) => {
     return result;
 }
 
-const updatePostOnDB = async() => {}
+const updatePostOnDB = async(postId : string, payload : IUpdatePostPayload , userId : string , isAdmin : boolean) => {
+    const post = await prisma.post.findUniqueOrThrow({
+        where : {
+            id : postId
+        }
+    })
 
-const deletePostFromDB = async() => {}
+    if(!isAdmin && post.authorId !== userId){
+        throw new Error("You do not have permission to update this post.")
+    }
+
+    const result = await prisma.post.update({
+        where : {
+            id : postId
+        },
+        data : payload,
+        include : {
+            author : {
+                omit : {
+                    password : true
+                }
+            },
+            comment : true
+        }
+    })
+
+    return result
+}
+
+const deletePostFromDB = async(postId : string , userId : string , isAdmin : boolean) => {
+    const post = await prisma.post.findUniqueOrThrow({
+        where : {
+            id : postId
+        }
+    })
+
+    if(!isAdmin && post.authorId !== userId){
+        throw new Error("You do not have permission to update this post.")
+    }
+
+    const result = await prisma.post.delete({
+        where : {
+            id : postId
+        }
+    })
+
+    return result;
+}
 
 
 

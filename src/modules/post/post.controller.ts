@@ -61,9 +61,44 @@ const createPost = catchAsync(async(req : Request , res : Response, next : NextF
     })
 })
 
-const updatePost = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
+const updatePost = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const userId = req.user?.id;
+    const isAdmin = req.user?.role === "ADMIN";
+    const postId = req.params.postId;
+    const payload = req.body;
 
-const deletePost = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
+     if(!postId){
+        throw new Error("Post id required in params.")
+    }
+
+    const result = await postService.updatePostOnDB(postId as string , payload , userId as string , isAdmin)
+
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "Post updated successfully!",
+        data : result
+    })
+})
+
+const deletePost = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const userId = req.user?.id;
+    const isAdmin = req.user?.role === "ADMIN";
+    const postId = req.params.postId;
+
+     if(!postId){
+        throw new Error("Post id required in params.")
+    }
+
+    const result = await postService.deletePostFromDB(postId as string , userId as string , isAdmin)
+
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "Post deleted successfully!",
+        data : result
+    })
+})
 
 
 export const postController = {

@@ -4,11 +4,46 @@ import { catchAsync } from "../../utils/catchAsync"
 import { postService } from "./post.service"
 import { sendResponse } from "../../utils/sendResponse"
 
-const getAllPosts = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
+const getAllPosts = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const result = await postService.getAllPostsFromDB()
 
-const getSpecificPost = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "All post fetched successfully!",
+        data : result
+    })
+})
 
-const getMyPosts = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
+const getSpecificPost = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const postId = req.params.postId;
+
+    if(!postId){
+        throw new Error("Post id required in params.")
+    }
+
+    const result = await postService.getSpecificPostFromDB(postId as string)
+
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "Post fetched successfully!",
+        data : result
+    })
+})
+
+const getMyPosts = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const authorId = req.user?.id;
+
+    const result = await postService.getMyPostsFromDB(authorId as string);
+
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "My posts fetched successfully!",
+        data : result
+    })
+})
 
 const getPostStats = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
 

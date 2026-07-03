@@ -45,7 +45,16 @@ const getMyPosts = catchAsync(async(req : Request , res : Response, next : NextF
     })
 })
 
-const getPostStats = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
+const getPostStats = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const result = await postService.getPostStatsFromDB();
+
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "Post stats retrieved successfully!",
+        data : result
+    })
+})
 
 const createPost = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
     const userId = req.user?.id;

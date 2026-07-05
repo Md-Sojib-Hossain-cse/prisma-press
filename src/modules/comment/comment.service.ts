@@ -64,18 +64,81 @@ const createCommentOnDB = async(authorId : string , payload : ICreateComment)=> 
 }
 
 const updateCommentOnDB = async(userId : string, commentId : string , payload : IUpdateComment)=> {
-    const result = await prisma.comment.findUnique({
+    const comment = await prisma.comment.findUnique({
+        where : {
+            id : commentId
+        },
+        include : {
+            author : {
+                select : {
+                    role : true
+                }
+            }
+        }
+    })
+
+    if(!comment){
+        throw new Error("No comment found!")
+    }
+
+    if(comment.authorId !== userId || comment.author.role !== "ADMIN"){
+        throw new Error("You're not permitted to update this comment")
+    }
+
+    const result = await prisma.comment.update({
+        where : {
+            id : commentId
+        },
+        data : payload,
+        include : {
+            author : {
+                omit : {
+                    password : true
+                }
+            },
+            post : {
+                select : {
+                    id : true,
+                    title : true,
+                    views : true
+                }
+            }
+        }
+    })
+
+    return result;
+}
+
+const deleteCommentFromDB = async(userId : string, commentId : string)=> {
+    const comment = await prisma.comment.findUnique({
+        where : {
+            id : commentId
+        },
+        include : {
+            author : {
+                select : {
+                    role : true
+                }
+            }
+        }
+    })
+
+    if(!comment){
+        throw new Error("No comment found!")
+    }
+
+    if(comment.authorId !== userId || comment.author.role !== "ADMIN"){
+        throw new Error("You're not permitted to delete this comment")
+    }
+
+    await prisma.comment.delete({
         where : {
             id : commentId
         }
     })
 
-    console.log(result)
-
     return null;
 }
-
-const deleteCommentFromDB = async()=> {}
 
 const changeCommentModStatsOnDB = async(commentId : string , status : CommentStatus)=> {
     const result = await prisma.comment.update({

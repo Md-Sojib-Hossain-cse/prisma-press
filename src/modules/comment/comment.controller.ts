@@ -54,7 +54,19 @@ const updateComment = catchAsync(async(req : Request , res : Response, next : Ne
         data : result
     })
 })
-const deleteComment = catchAsync(async(req : Request , res : Response, next : NextFunction) => {})
+const deleteComment = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const userId = req.user?.id;
+    const commentId = req.params.commentId;
+
+    const result = await commentService.deleteCommentFromDB(userId as string,commentId as string)
+
+    sendResponse(res , {
+        success : true,
+        statusCode : httpStatus.OK,
+        message : "Comment deleted successfully!",
+        data : result
+    })
+})
 const changeCommentModStats = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
     const commentId = req.params.commentId;
     const payload = req.body;

@@ -60,33 +60,43 @@ const getAllPostsFromDB = async() => {
 
         //combining search (OR) and filtering (AND)
 
-        where : {
-            AND : [
-                //searching
-                {
-                    OR : [
-                        {
-                            title : {
-                                contains : "Ron",
-                                mode : "insensitive"
-                            }
-                        },
-                        {
-                            content : {
-                                contains : "Ron",
-                                mode : "insensitive"
-                            }
-                        }
-                    ]
-                },
-                //filtering
-                {
-                    title : "Ronaldo"
-                },
-                {
-                    content : "Ronaldo"
-                }
-            ]
+        // where : {
+        //     AND : [
+        //         //searching
+        //         {
+        //             OR : [
+        //                 {
+        //                     title : {
+        //                         contains : "Ron",
+        //                         mode : "insensitive"
+        //                     }
+        //                 },
+        //                 {
+        //                     content : {
+        //                         contains : "Ron",
+        //                         mode : "insensitive"
+        //                     }
+        //                 }
+        //             ]
+        //         },
+        //         //filtering
+        //         {
+        //             title : "Ronaldo"
+        //         },
+        //         {
+        //             content : "Ronaldo"
+        //         }
+        //     ]
+        // },
+
+        //pagination
+        take : 2, //showing 2 data
+        skip : (3-1) * 2,  //visiting page 1
+        //sorting
+        orderBy : {
+            createdAt : "desc",
+            title : "asc",
+            content : "asc"
         },
         include : {
             author : true,

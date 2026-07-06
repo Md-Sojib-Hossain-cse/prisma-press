@@ -4,14 +4,88 @@ import { IUpdatePostPayload, TCreatePostPayload } from "./post.interface"
 
 const getAllPostsFromDB = async() => {
     const result = await prisma.post.findMany({
+
+        //exact match without AND operator
         // where : {
         //     title : "My Fourth Post",
         //     content : "Ronaldo"
         // },
+
+        //exact match with AND operator
+        // where : {
+        //     AND : [
+        //         {title : "My Fourth Post"},
+        //         {content : "Ronaldo"},
+        //         {
+        //             tags : {
+        //                 // equals : ["typescript","prisma","express"],
+        //                 has : "typescript"
+        //             }
+        //         }
+        //     ]
+        // },
+
+        //searching or partial match
+        // where : {
+        //     title :{
+        //         contains : "ronaldo",
+        //         mode : "insensitive"
+        //     },
+        //     // not ideal for partial match
+        //     // content : {
+        //     //     contains : "ronaldo",
+        //     //     mode : "insensitive"
+        //     // }
+        // },
+
+
+        //searching or partial search using OR operator
+        // where  :{
+        //     OR : [
+        //         {
+        //             title : {
+        //                 contains : "Ronaldo",
+        //                 mode : "insensitive"
+        //         }
+        //     },
+        //     {
+        //         content : {
+        //             contains : "Ronaldo",
+        //             mode : "insensitive"
+        //         }
+        //     }
+        //     ]
+        // },
+
+
+        //combining search (OR) and filtering (AND)
+
         where : {
             AND : [
-                {title : "My Fourth Post"},
-                {content : "Ronaldo"}
+                //searching
+                {
+                    OR : [
+                        {
+                            title : {
+                                contains : "Ron",
+                                mode : "insensitive"
+                            }
+                        },
+                        {
+                            content : {
+                                contains : "Ron",
+                                mode : "insensitive"
+                            }
+                        }
+                    ]
+                },
+                //filtering
+                {
+                    title : "Ronaldo"
+                },
+                {
+                    content : "Ronaldo"
+                }
             ]
         },
         include : {

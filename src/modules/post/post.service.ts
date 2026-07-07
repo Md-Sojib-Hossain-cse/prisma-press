@@ -1,4 +1,5 @@
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
+import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma"
 import { IPostQuery, IUpdatePostPayload, TCreatePostPayload } from "./post.interface"
 
@@ -10,6 +11,65 @@ const getAllPostsFromDB = async(query : IPostQuery) => {
 
     const sortBy = query?.sortBy ? query.sortBy : "createdAt";
     const sortOrder = query?.sortOrder ? query.sortOrder : "desc"
+
+    const tagsArray = query.tags ? JSON.parse(query.tags as string) : [];
+
+    const andConditions : PostWhereInput[] = []
+
+    if(query.searchTerm){
+        andConditions.push({
+            OR : [
+                {
+                    title : {
+                        contains : query.searchTerm,
+                        mode : "insensitive"
+                    }
+                },
+                {
+                    content : {
+                        contains : query.searchTerm,
+                        mode : "insensitive"
+                    }
+                }
+            ]
+        })
+    }
+
+    if(query.title){
+        andConditions.push({
+            title : query.title
+        })
+    }
+
+    if(query.content){
+        andConditions.push({
+            content : query.content
+        })
+    }
+    if(query.authorId){
+        andConditions.push({
+            content : query.authorId
+        })
+    }
+    if(query.isFeatured){
+        andConditions.push({
+            isFeatured : Boolean(query.isFeatured)
+        })
+    }
+
+    if(typeof query.tags === "string"){
+        andConditions.push({
+            tags : {
+                hasSome : tagsArray
+            }
+        })
+    }
+
+    if(query.status){
+        andConditions.push({
+            status : query.status
+        })
+    }
 
     const result = await prisma.post.findMany({
 
@@ -106,29 +166,42 @@ const getAllPostsFromDB = async(query : IPostQuery) => {
         //     title : "asc",
         //     content : "asc"
         // },
+    
+
+        //dynamic searching , filtering , pagination and sorting
+        // where : {
+        //     AND: [
+        //         //title filtering
+        //         query?.title ? {title : query.title} : {},
+        //         query?.content ? {content : query.content} : {},
+        //         //searching
+        //         query?.searchTerm ? {
+        //             OR : [
+        //                 {
+        //                     title : {
+        //                         contains :query.searchTerm,
+        //                         mode : "insensitive"
+        //                     }
+        //                 },
+        //                 {
+        //                     content : {
+        //                         contains : query.searchTerm,
+        //                         mode : "insensitive"
+        //                     }
+        //                 }
+        //             ]
+        //         } : {}
+        //     ]
+        // },
+        // take : limit,
+        // skip : skip,
+        // orderBy : {
+        //     [sortBy] : sortOrder
+        // },
+
+
         where : {
-            AND: [
-                //title filtering
-                query?.title ? {title : query.title} : {},
-                query?.content ? {content : query.content} : {},
-                //searching
-                query?.searchTerm ? {
-                    OR : [
-                        {
-                            title : {
-                                contains :query.searchTerm,
-                                mode : "insensitive"
-                            }
-                        },
-                        {
-                            content : {
-                                contains : query.searchTerm,
-                                mode : "insensitive"
-                            }
-                        }
-                    ]
-                } : {}
-            ]
+            AND : andConditions
         },
         take : limit,
         skip : skip,

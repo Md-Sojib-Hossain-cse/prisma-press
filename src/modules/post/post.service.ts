@@ -1,8 +1,16 @@
 import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma"
-import { IUpdatePostPayload, TCreatePostPayload } from "./post.interface"
+import { IPostQuery, IUpdatePostPayload, TCreatePostPayload } from "./post.interface"
 
-const getAllPostsFromDB = async() => {
+const getAllPostsFromDB = async(query : IPostQuery) => {
+
+    const limit = query?.limit ? Number(query.limit) : 10
+    const page = query?.page ? Number(query.page) : 1
+    const skip = (page -1) * limit
+
+    const sortBy = query?.sortBy ? query.sortBy : "createdAt";
+    const sortOrder = query?.sortOrder ? query.sortOrder : "desc"
+
     const result = await prisma.post.findMany({
 
         //exact match without AND operator
@@ -90,13 +98,42 @@ const getAllPostsFromDB = async() => {
         // },
 
         //pagination
-        take : 2, //showing 2 data
-        skip : (3-1) * 2,  //visiting page 1
+        // take : 2, //showing 2 data
+        // skip : (3-1) * 2,  //visiting page 1
         //sorting
+        // orderBy : {
+        //     createdAt : "desc",
+        //     title : "asc",
+        //     content : "asc"
+        // },
+        where : {
+            AND: [
+                //title filtering
+                query?.title ? {title : query.title} : {},
+                query?.content ? {content : query.content} : {},
+                //searching
+                query?.searchTerm ? {
+                    OR : [
+                        {
+                            title : {
+                                contains :query.searchTerm,
+                                mode : "insensitive"
+                            }
+                        },
+                        {
+                            content : {
+                                contains : query.searchTerm,
+                                mode : "insensitive"
+                            }
+                        }
+                    ]
+                } : {}
+            ]
+        },
+        take : limit,
+        skip : skip,
         orderBy : {
-            createdAt : "desc",
-            title : "asc",
-            content : "asc"
+            [sortBy] : sortOrder
         },
         include : {
             author : true,

@@ -7,7 +7,10 @@ model User{
     role Role @default(USER)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    
     profile Profile?
+    subscriptions Subscription?
+
     comments Comment[]
     posts Post[]
     

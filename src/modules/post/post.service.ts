@@ -57,6 +57,10 @@ const getAllPostsFromDB = async(query : IPostQuery) => {
         })
     }
 
+    andConditions.push({
+        isPremium : false
+    })
+
     if(typeof query.tags === "string"){
         andConditions.push({
             tags : {
@@ -260,7 +264,7 @@ const getSpecificPostFromDB = async(postId : string) => {
         async(tx) => {
             await tx.post.update({
                 where : {
-                    id : postId
+                    id : postId 
                 },
                 data : {
                     views : {
@@ -271,7 +275,8 @@ const getSpecificPostFromDB = async(postId : string) => {
 
             const post =await tx.post.findUniqueOrThrow({
                 where : {
-                    id : postId
+                    id : postId,
+                    isPremium : false
                 },
                 include : {
                     author : {

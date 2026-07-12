@@ -24,22 +24,12 @@ const getSpecificAuthorCommentsFromDB = async(authorId : string) => {
     return result;
 }
 
-const getSingleCommentFromDB = async(commentId : string)=> {
-    const result = await prisma.comment.findUnique({
+const getCommentsByPostIdFromDB = async(postId : string)=> {
+    const result = await prisma.comment.findMany({
         where : {
-            id : commentId
-        },
-        include : {
-            post : {
-                select : {
-                    id : true,
-                    title : true,
-                    views : true
-                }
-            }
-         }
+            postId
+        }
     })
-
 
     return result;
 }
@@ -170,7 +160,7 @@ const changeCommentModStatsOnDB = async(commentId : string , status : CommentSta
 
 export const commentService = {
     getSpecificAuthorCommentsFromDB,
-    getSingleCommentFromDB,
+    getCommentsByPostIdFromDB,
     createCommentOnDB,
     updateCommentOnDB,
     deleteCommentFromDB,

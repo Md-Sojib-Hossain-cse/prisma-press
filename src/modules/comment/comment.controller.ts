@@ -15,10 +15,10 @@ const getSpecificAuthorComments = catchAsync(async(req : Request , res : Respons
         data : result
     })
 })
-const getSingleComment = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
-    const commentId = req.params.commentId;
+const getCommentByPostId = catchAsync(async(req : Request , res : Response, next : NextFunction) => {
+    const postId = req.params.postId;
 
-    const result = await commentService.getSingleCommentFromDB(commentId as string)
+    const result = await commentService.getCommentsByPostIdFromDB(postId as string)
 
     sendResponse(res , {
         success : true,
@@ -83,7 +83,7 @@ const changeCommentModStats = catchAsync(async(req : Request , res : Response, n
 
 export const commentController = {
     getSpecificAuthorComments,
-    getSingleComment,
+    getCommentByPostId,
     createComment,
     updateComment,
     deleteComment,

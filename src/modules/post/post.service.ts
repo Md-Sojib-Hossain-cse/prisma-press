@@ -57,9 +57,6 @@ const getAllPostsFromDB = async(query : IPostQuery) => {
         })
     }
 
-    andConditions.push({
-        isPremium : false
-    })
 
     if(typeof query.tags === "string"){
         andConditions.push({
@@ -75,6 +72,10 @@ const getAllPostsFromDB = async(query : IPostQuery) => {
         })
     }
 
+    andConditions.push({
+        isPremium : false
+    })
+    
     const result = await prisma.post.findMany({
 
         //exact match without AND operator
@@ -219,7 +220,21 @@ const getAllPostsFromDB = async(query : IPostQuery) => {
 
     })
 
-    return result;
+    const totalPostCount = await prisma.post.count({
+        where : {
+            AND : andConditions
+        }
+    })
+
+    return {
+        data : result,
+        meta : {
+            page : page,
+            limit : limit,
+            total : totalPostCount,
+            totalPages : Math.ceil(totalPostCount / limit)
+        }
+    };
 }
 
 const getSpecificPostFromDB = async(postId : string) => {
@@ -453,6 +468,18 @@ const getPostStatsFromDB = async() => {
 }
 
 const createPostOnDB = async(userId : string ,payload : TCreatePostPayload) => {
+    const user = await prisma.user.findUniqueOrThrow({
+        where : {
+            id : userId
+        },
+        include : {
+            subscriptions : true
+        }
+    })
+
+    if(payload?.isPremium && user?.subscriptions?.status !== "ACTIVE"){
+        throw new Error("Youre not a premium user so you cannot create premium content")
+    }
     const result = await prisma.post.create({
         data : {
             ...payload,

@@ -6,6 +6,7 @@ export type TCreatePostPayload = {
     content : string;
     thumbnail ?: string;
     isFeatured ?:boolean;
+    isPremium ?: boolean;
     status ?: PostStatus;
     tags : string[]
 }
